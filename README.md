@@ -1,36 +1,30 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Stok Toko
 
-## Getting Started
+Aplikasi pencatatan stok multi-cabang (Next.js + Supabase). Lihat `docs/PRD.md`.
 
-First, run the development server:
+## Setup
+
+1. Buat project gratis di https://supabase.com.
+2. Buka **SQL Editor**, tempel seluruh isi `supabase/schema.sql`, lalu **Run**.
+3. Buka **Authentication → Providers → Email**, matikan **Allow new users to sign up** (agar hanya owner yang bisa masuk).
+4. Buka **Authentication → Users → Add user**, buat akun owner (email + kata sandi, centang *Auto Confirm*). Tiga cabang awal dibuat otomatis.
+   - Jika Anda sudah membuat user sebelum menjalankan SQL, tambahkan cabang lewat menu **Cabang** di aplikasi.
+5. Salin **Project URL** dan **anon/publishable key** (Project Settings → API) ke `.env.local`.
+6. Jalankan:
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Mode demo (tanpa Supabase)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Isi `DEMO_MODE=true` di `.env.local` untuk mencoba aplikasi dengan data contoh yang disimpan di memori (login dilewati, data hilang saat server restart). Mode ini otomatis mati di production.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Membuka dari HP saat development
 
-## Learn More
+Jalankan `npm run dev`, lalu buka `http://<IP-komputer>:3000` dari HP di Wi-Fi yang sama. Alamat jaringan `192.168.*.*` dan `10.*.*.*` sudah diizinkan di `next.config.ts`.
 
-To learn more about Next.js, take a look at the following resources:
+## Deploy ke Vercel
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Push ke GitHub, import di Vercel, lalu isi Environment Variables yang sama dengan `.env.local`.

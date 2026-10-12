@@ -1,26 +1,90 @@
 @import "tailwindcss";
 
+/* Palet: kertas hangat + tinta, satu aksen hijau tua. Status memakai warna semantik. */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --paper: #f4f2ec;
+  --surface: #fffefa;
+  --ink: #1b1a17;
+  --muted: #67645b;
+  --line: #dcd8cc;
+  --accent: #1b5e48;
+  --on-accent: #ffffff;
+  --danger: #b42318;
+  --warn: #8a5a00;
+  --ok: #1b5e48;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --paper: #111210;
+    --surface: #191b18;
+    --ink: #ecebe4;
+    --muted: #a09d92;
+    --line: #2e302b;
+    --accent: #6cc3a0;
+    --on-accent: #0b1812;
+    --danger: #f48b82;
+    --warn: #e3b252;
+    --ok: #6cc3a0;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@theme inline {
+  --color-paper: var(--paper);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-on-accent: var(--on-accent);
+  --color-danger: var(--danger);
+  --color-warn: var(--warn);
+  --color-ok: var(--ok);
+  --font-sans: var(--font-plex), system-ui, sans-serif;
 }
+
+html { color-scheme: light dark; }
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-plex), system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.45;
+  -webkit-tap-highlight-color: transparent;
+  text-rendering: optimizeLegibility;
+}
+
+.num { font-variant-numeric: tabular-nums; }
+
+@layer components {
+  .panel { @apply rounded-xl border border-line bg-surface; }
+
+  .input {
+    @apply min-h-12 w-full rounded-lg border border-line bg-surface px-3.5 text-base text-ink outline-none
+    placeholder:text-muted/60 focus:border-accent focus:ring-2 focus:ring-accent/30;
+  }
+  .label { @apply mb-1.5 block text-sm font-medium text-ink; }
+
+  .btn-primary {
+    @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-accent px-5 text-base font-semibold
+    text-on-accent hover:opacity-90 active:opacity-80 disabled:opacity-60;
+  }
+  .btn-soft {
+    @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-line bg-surface px-5 text-base
+    font-medium text-ink hover:bg-line/40 active:bg-line/60 disabled:opacity-60;
+  }
+  .btn-danger {
+    @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-danger px-5 text-base font-semibold
+    text-paper hover:opacity-90 active:opacity-80 disabled:opacity-60;
+  }
+  .icon-btn {
+    @apply inline-flex size-12 shrink-0 items-center justify-center text-muted hover:text-ink active:bg-line/50;
+  }
+}
+
+dialog { border: 0; }
+dialog::backdrop { background: rgb(10 12 10 / 0.55); }
+dialog[open] { animation: naik 0.18s ease-out; }
+@keyframes naik { from { transform: translateY(24px); opacity: 0.6; } }
+@media (prefers-reduced-motion: reduce) { dialog[open] { animation: none; } }
