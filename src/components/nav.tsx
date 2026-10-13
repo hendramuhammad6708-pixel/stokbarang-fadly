@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LayoutGrid, Layers, Shirt, Store, History, Settings2 } from "lucide-react";
+import { Logo } from "@/components/logo";
 
 type Item = { href: string; label: string; icon: typeof LayoutGrid; cocok?: string[] };
 
@@ -30,7 +31,7 @@ export function Nav() {
   return (
     <>
       <aside className="fixed inset-y-0 left-0 hidden w-56 flex-col border-r border-line bg-surface md:flex">
-        <p className="px-5 pb-5 pt-6 text-lg font-bold">Stok Toko</p>
+        <p className="flex items-center gap-2.5 px-5 pb-5 pt-6 text-lg font-bold"><Logo size={30} /> Stok Toko</p>
         <nav>
           {menuDesktop.map((it) => (
             <Link

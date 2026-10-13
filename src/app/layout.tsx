@@ -8,6 +8,7 @@ const plex = IBM_Plex_Sans({ variable: "--font-plex", subsets: ["latin"], weight
 export const metadata: Metadata = {
   title: "Stok Toko",
   description: "Pencatatan stok barang multi-cabang",
+  appleWebApp: { capable: true, title: "Stok Toko", statusBarStyle: "default" },
 };
 
 export const viewport: Viewport = {

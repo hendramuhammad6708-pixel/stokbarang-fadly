@@ -1,4 +1,5 @@
 import { LogOut } from "lucide-react";
+import { Logo } from "@/components/logo";
 import { Nav } from "@/components/nav";
 import { logout } from "../actions";
 
@@ -7,7 +8,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     <div className="md:pl-56">
       <Nav />
       <header className="sticky top-0 z-30 flex items-center justify-between border-b border-line bg-paper pl-4 md:hidden">
-        <span className="text-lg font-bold">Stok Toko</span>
+        <span className="flex items-center gap-2.5 text-lg font-bold"><Logo size={28} /> Stok Toko</span>
         <form action={logout}>
           <button aria-label="Keluar" className="icon-btn"><LogOut size={20} /></button>
         </form>

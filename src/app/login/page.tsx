@@ -1,12 +1,14 @@
 "use client";
 
 import { useActionState } from "react";
+import { Logo } from "@/components/logo";
 import { login } from "../actions";
 
 export default function LoginPage() {
   const [state, action, pending] = useActionState(login, undefined);
   return (
     <main className="mx-auto flex min-h-dvh max-w-sm flex-col justify-center px-6 py-10">
+      <Logo size={56} className="mb-5" />
       <h1 className="text-3xl font-bold">Stok Toko</h1>
       <p className="mb-8 mt-1 text-muted">Masuk untuk mengelola stok semua cabang.</p>
 
