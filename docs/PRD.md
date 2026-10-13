@@ -74,7 +74,8 @@ Web app untuk pemilik toko (owner) mengelola stok barang di beberapa cabang dari
 
 ### F6. Riwayat Mutasi
 - Daftar semua mutasi, urut terbaru, dengan filter cabang, barang, jenis, dan rentang tanggal.
-- Pagination.
+- Pagination. Riwayat dikelompokkan per hari.
+- **Hapus riwayat**: satu per satu (ikon tempat sampah), atau banyak sekaligus (lebih lama dari 30 hari / 90 hari / 1 tahun, atau semua; menghapus semua wajib mengetik HAPUS). Menghapus riwayat tidak mengubah jumlah stok dan tidak dapat dikembalikan.
 
 ## 5. Kebutuhan Non-Fungsional
 

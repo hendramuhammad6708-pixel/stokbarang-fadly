@@ -1,32 +1,17 @@
 @import "tailwindcss";
 
-/* Palet: kertas hangat + tinta, satu aksen hijau tua. Status memakai warna semantik. */
+/* Palet: latar putih + tinta, satu aksen hijau tua. Selalu terang (tidak mengikuti mode gelap perangkat). */
 :root {
-  --paper: #f4f2ec;
-  --surface: #fffefa;
+  --paper: #ffffff;
+  --surface: #ffffff;
   --ink: #1b1a17;
   --muted: #67645b;
-  --line: #dcd8cc;
+  --line: #e2e0d9;
   --accent: #1b5e48;
   --on-accent: #ffffff;
   --danger: #b42318;
   --warn: #8a5a00;
   --ok: #1b5e48;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --paper: #111210;
-    --surface: #191b18;
-    --ink: #ecebe4;
-    --muted: #a09d92;
-    --line: #2e302b;
-    --accent: #6cc3a0;
-    --on-accent: #0b1812;
-    --danger: #f48b82;
-    --warn: #e3b252;
-    --ok: #6cc3a0;
-  }
 }
 
 @theme inline {
@@ -43,7 +28,7 @@
   --font-sans: var(--font-plex), system-ui, sans-serif;
 }
 
-html { color-scheme: light dark; }
+html { color-scheme: light; }
 
 body {
   background: var(--paper);

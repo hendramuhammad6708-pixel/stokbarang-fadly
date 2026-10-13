@@ -66,6 +66,8 @@ create policy "milik sendiri" on public.products for all
 -- stok & riwayat hanya boleh dibaca langsung; perubahan lewat fungsi catat_mutasi
 create policy "baca milik sendiri" on public.stock_levels for select using (owner_id = auth.uid());
 create policy "baca milik sendiri" on public.stock_movements for select using (owner_id = auth.uid());
+-- Riwayat boleh dihapus pemiliknya. Menghapus riwayat TIDAK mengubah jumlah stok (stok disimpan terpisah di stock_levels).
+create policy "hapus milik sendiri" on public.stock_movements for delete using (owner_id = auth.uid());
 
 -- Mencatat mutasi secara atomik.
 --  * 'penyesuaian': p_jumlah = jumlah stok sebenarnya (hasil hitung).

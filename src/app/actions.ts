@@ -150,3 +150,35 @@ export async function catatCepat(productId: string, branchId: string, tipe: "mas
   revalidatePath("/", "layout");
   return {};
 }
+
+// Menghapus riwayat TIDAK mengubah jumlah stok; hanya catatannya yang hilang.
+export async function hapusRiwayat(_: ActionState, f: FormData): Promise<ActionState> {
+  const id = str(f, "id");
+  if (!id) return { error: "Riwayat tidak dipilih" };
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("stock_movements").delete().eq("id", id).select("id");
+  if (error) return { error: error.message };
+  if (!data?.length) return { error: "Riwayat tidak ditemukan atau tidak bisa dihapus" };
+  revalidatePath("/", "layout");
+  return { ok: true };
+}
+
+export async function hapusRiwayatBanyak(_: ActionState, f: FormData): Promise<ActionState> {
+  const rentang = str(f, "rentang");
+  const supabase = await createClient();
+  const q = supabase.from("stock_movements").delete();
+  let hasil;
+  if (rentang === "semua") {
+    if (str(f, "konfirmasi").toUpperCase() !== "HAPUS") return { error: "Ketik HAPUS untuk menghapus seluruh riwayat" };
+    hasil = await q.gte("created_at", "1970-01-01T00:00:00Z").select("id");
+  } else {
+    const hari = Number(rentang);
+    if (![30, 90, 365].includes(hari)) return { error: "Pilihan rentang tidak valid" };
+    const batas = new Date(Date.now() - hari * 86_400_000).toISOString();
+    hasil = await q.lt("created_at", batas).select("id");
+  }
+  if (hasil.error) return { error: hasil.error.message };
+  if (!hasil.data?.length) return { error: "Tidak ada riwayat yang cocok untuk dihapus" };
+  revalidatePath("/", "layout");
+  return { ok: true };
+}

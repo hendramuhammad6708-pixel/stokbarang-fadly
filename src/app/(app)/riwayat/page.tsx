@@ -1,9 +1,13 @@
 import Link from "next/link";
+import { Trash2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { AutoSubmitSelect } from "@/components/auto-submit-select";
+import { FormDialog } from "@/components/form-dialog";
+import { HapusRiwayatFields } from "@/components/hapus-riwayat-fields";
 import { Empty, PageHeader } from "@/components/page-header";
 import { jam, kunciHari, labelHari, rupiah } from "@/lib/format";
 import type { Branch, Movement } from "@/lib/types";
+import { hapusRiwayat, hapusRiwayatBanyak } from "../../actions";
 
 type Row = Movement & { products: { nama: string; satuan: string } | null; branches: { nama: string } | null };
 const PER_HALAMAN = 25;
@@ -50,7 +54,26 @@ export default async function RiwayatPage({ searchParams }: { searchParams: Prom
 
   return (
     <>
-      <PageHeader title="Riwayat" subtitle="Semua perubahan stok, terbaru di atas" />
+      <PageHeader
+        title="Riwayat"
+        subtitle="Semua perubahan stok, terbaru di atas"
+        action={
+          rows.length > 0 ? (
+            <FormDialog
+              trigger={<><Trash2 size={18} /> Hapus</>}
+              triggerClassName="btn-soft shrink-0 whitespace-nowrap !px-4"
+              triggerLabel="Hapus riwayat"
+              title="Hapus riwayat"
+              description="Pilih riwayat mana yang ingin dihapus."
+              action={hapusRiwayatBanyak}
+              submitLabel="Hapus"
+              danger
+            >
+              <HapusRiwayatFields />
+            </FormDialog>
+          ) : undefined
+        }
+      />
 
       <form className="mb-5 grid grid-cols-2 gap-3">
         <AutoSubmitSelect name="cabang" defaultValue={cabang} aria-label="Filter cabang">
@@ -73,7 +96,8 @@ export default async function RiwayatPage({ searchParams }: { searchParams: Prom
               {g.rows.map((m) => {
                 const delta = m.stok_sesudah - m.stok_sebelum;
                 return (
-                  <li key={m.id} className="flex items-start justify-between gap-3 px-4 py-3">
+                  <li key={m.id} className="flex items-start">
+                    <div className="flex min-w-0 flex-1 items-start justify-between gap-3 py-3 pl-4">
                     <div className="min-w-0">
                       <p className="truncate font-medium">{m.products?.nama ?? "Barang dihapus"}</p>
                       <p className="truncate text-sm text-muted">{m.branches?.nama} · {jam(m.created_at)} · {TIPE_LABEL[m.tipe]}</p>
@@ -86,6 +110,19 @@ export default async function RiwayatPage({ searchParams }: { searchParams: Prom
                       <p className={`num text-lg font-bold leading-tight ${delta >= 0 ? "text-ok" : "text-danger"}`}>{delta > 0 ? "+" : ""}{delta}</p>
                       <p className="num text-xs text-muted">{m.stok_sebelum} → {m.stok_sesudah}</p>
                     </div>
+                    </div>
+                    <FormDialog
+                      trigger={<Trash2 size={17} />}
+                      triggerClassName="icon-btn !size-12 shrink-0"
+                      triggerLabel={`Hapus riwayat ${m.products?.nama ?? ""}`}
+                      title="Hapus riwayat ini?"
+                      description={`${m.products?.nama ?? "Barang"} · ${m.branches?.nama ?? ""} · ${delta > 0 ? "+" : ""}${delta}. Jumlah stok tidak berubah; hanya catatan ini yang dihapus.`}
+                      action={hapusRiwayat}
+                      submitLabel="Hapus"
+                      danger
+                    >
+                      <input type="hidden" name="id" value={m.id} />
+                    </FormDialog>
                   </li>
                 );
               })}

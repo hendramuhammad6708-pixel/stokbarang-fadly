@@ -49,7 +49,7 @@ const nextId = () => `d${(g.__demoId = (g.__demoId ?? 0) + 1)}`;
 
 class Query implements PromiseLike<any> {
   private op: "select" | "insert" | "update" | "delete" = "select";
-  private filters: [string, any][] = [];
+  private filters: ["eq" | "lt" | "gte", string, any][] = [];
   private orders: { col: string; asc: boolean }[] = [];
   private limit_?: number;
   private range_?: [number, number];
@@ -65,12 +65,15 @@ class Query implements PromiseLike<any> {
   insert(data: Row) { this.op = "insert"; this.patch = data; return this; }
   update(data: Row) { this.op = "update"; this.patch = data; return this; }
   delete() { this.op = "delete"; return this; }
-  eq(col: string, val: any) { this.filters.push([col, val]); return this; }
+  eq(col: string, val: any) { this.filters.push(["eq", col, val]); return this; }
+  lt(col: string, val: any) { this.filters.push(["lt", col, val]); return this; }
+  gte(col: string, val: any) { this.filters.push(["gte", col, val]); return this; }
   order(col: string, o?: { ascending?: boolean }) { this.orders.push({ col, asc: o?.ascending !== false }); return this; }
   limit(n: number) { this.limit_ = n; return this; }
   range(a: number, b: number) { this.range_ = [a, b]; return this; }
 
-  private matches = (r: Row) => this.filters.every(([c, v]) => r[c] === v);
+  private matches = (r: Row) =>
+    this.filters.every(([op, c, v]) => (op === "eq" ? r[c] === v : op === "lt" ? r[c] < v : r[c] >= v));
 
   private run() {
     const rows = store()[this.table];
@@ -88,8 +91,9 @@ class Query implements PromiseLike<any> {
     }
     if (this.op === "delete") {
       const s = store();
+      const dihapus = rows.filter(this.matches);
       s[this.table] = rows.filter((r) => !this.matches(r));
-      return { data: null, error: null };
+      return { data: dihapus, error: null };
     }
     let out = rows.filter(this.matches);
     if (this.count) return { data: null, count: out.length, error: null };
