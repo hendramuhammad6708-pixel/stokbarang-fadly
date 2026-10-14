@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import type { Branch, Product, StockLevel } from "@/lib/types";
+import type { Branch, Product, RecentMovement, ShellData, StockLevel } from "@/lib/types";
 
 const HALAMAN = 1000; // batas baris per permintaan di Supabase
 
@@ -26,4 +26,17 @@ export async function getBase() {
   const stok = new Map(levels.map((l) => [`${l.product_id}:${l.branch_id}`, l.jumlah]));
   const getStok = (productId: string, branchId: string) => stok.get(`${productId}:${branchId}`) ?? 0;
   return { branches, products, getStok };
+}
+
+// Dimuat sekali di layout. Layout tidak dirender ulang saat pindah halaman, jadi navigasi tidak perlu ke server lagi;
+// data diperbarui setelah setiap perubahan (revalidatePath) dan saat aplikasi dibuka kembali (lihat DataProvider).
+export async function getShellData(): Promise<ShellData> {
+  const supabase = await createClient();
+  const [{ branches, products, getStok }, { data }] = await Promise.all([
+    getBase(),
+    supabase.from("stock_movements").select("*, products(nama), branches(nama)").order("created_at", { ascending: false }).limit(8),
+  ]);
+  const stok: Record<string, number[]> = {};
+  for (const p of products) stok[p.id] = branches.map((b) => getStok(p.id, b.id));
+  return { branches, products, stok, terbaru: (data ?? []) as unknown as RecentMovement[] };
 }

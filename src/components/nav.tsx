@@ -1,9 +1,15 @@
 "use client";
 
-import Link from "next/link";
+import Link, { useLinkStatus } from "next/link";
 import { usePathname } from "next/navigation";
 import { LayoutGrid, Layers, Shirt, Store, History, Settings2 } from "lucide-react";
 import { Logo } from "@/components/logo";
+
+// Umpan balik halus saat halaman tujuan sedang dimuat (tanpa kerangka loading, yang justru menunda tampilan ~300 ms)
+function Pending() {
+  const { pending } = useLinkStatus();
+  return pending ? <span aria-hidden className="absolute inset-0 animate-pulse bg-line/60" /> : null;
+}
 
 type Item = { href: string; label: string; icon: typeof LayoutGrid; cocok?: string[] };
 
@@ -38,11 +44,12 @@ export function Nav() {
               key={it.href}
               href={it.href}
               aria-current={aktif(it) ? "page" : undefined}
-              className={`flex min-h-11 items-center gap-3 border-l-4 px-4 text-[15px] font-medium ${
+              className={`relative flex min-h-11 items-center gap-3 border-l-4 px-4 text-[15px] font-medium ${
                 aktif(it) ? "border-accent bg-line/40 text-ink" : "border-transparent text-muted hover:text-ink"
               }`}
             >
               <it.icon size={18} /> {it.label}
+              <Pending />
             </Link>
           ))}
         </nav>
@@ -55,12 +62,13 @@ export function Nav() {
               <Link
                 href={it.href}
                 aria-current={aktif(it) ? "page" : undefined}
-                className={`-mt-px flex min-h-14 flex-col items-center justify-center gap-0.5 border-t-2 text-xs font-medium ${
+                className={`relative -mt-px flex min-h-14 flex-col items-center justify-center gap-0.5 border-t-2 text-xs font-medium ${
                   aktif(it) ? "border-accent text-accent" : "border-transparent text-muted"
                 }`}
               >
                 <it.icon size={21} strokeWidth={aktif(it) ? 2.3 : 1.8} />
                 {it.label}
+                <Pending />
               </Link>
             </li>
           ))}

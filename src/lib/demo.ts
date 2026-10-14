@@ -47,6 +47,9 @@ const g = globalThis as unknown as { __demoStore?: Store; __demoId?: number };
 const store = (): Store => (g.__demoStore ??= seed());
 const nextId = () => `d${(g.__demoId = (g.__demoId ?? 0) + 1)}`;
 
+// Simulasi jeda jaringan ke database (ms), hanya untuk mengukur kecepatan saat pengujian
+const jeda = () => new Promise((r) => setTimeout(r, Number(process.env.DEMO_LATENCY ?? 0)));
+
 class Query implements PromiseLike<any> {
   private op: "select" | "insert" | "update" | "delete" = "select";
   private filters: ["eq" | "lt" | "gte", string, any][] = [];
@@ -120,7 +123,7 @@ class Query implements PromiseLike<any> {
   }
 
   then<R1 = any, R2 = never>(ok?: ((v: any) => R1 | PromiseLike<R1>) | null, err?: ((e: any) => R2 | PromiseLike<R2>) | null) {
-    return Promise.resolve(this.run()).then(ok, err);
+    return jeda().then(() => this.run()).then(ok, err);
   }
 }
 
@@ -175,7 +178,7 @@ function tambahBarang(a: any) {
 export function createDemoClient() {
   return {
     from: (table: keyof Store) => new Query(table),
-    rpc: async (fn: string, args: any) => (fn === "tambah_barang" ? tambahBarang(args) : catatMutasi(args)),
+    rpc: async (fn: string, args: any) => (await jeda(), fn === "tambah_barang" ? tambahBarang(args) : catatMutasi(args)),
     auth: { signOut: async () => ({ error: null }), signInWithPassword: async () => ({ error: null }) },
   } as any;
 }

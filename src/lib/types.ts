@@ -8,4 +8,9 @@ export type Movement = {
   id: string; product_id: string; branch_id: string; tipe: "masuk" | "keluar" | "penyesuaian";
   jumlah: number; stok_sebelum: number; stok_sesudah: number; total_harga: number | null; catatan: string | null; created_at: string;
 };
+export type RecentMovement = Movement & { products: { nama: string } | null; branches: { nama: string } | null };
+
+/** Data bersama untuk semua halaman (dimuat sekali di layout). `stok` per barang, urutannya mengikuti `branches`. */
+export type ShellData = { branches: Branch[]; products: Product[]; stok: Record<string, number[]>; terbaru: RecentMovement[] };
+
 export type ActionState = { error?: string; ok?: boolean } | undefined;
