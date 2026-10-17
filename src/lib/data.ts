@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import type { Branch, Product, RecentMovement, ShellData, StockLevel } from "@/lib/types";
+import type { Branch, PembayaranSupplier, Product, RecentMovement, ShellData, StockLevel, UtangRow } from "@/lib/types";
 
 const HALAMAN = 1000; // batas baris per permintaan di Supabase
 
@@ -32,11 +32,19 @@ export async function getBase() {
 // data diperbarui setelah setiap perubahan (revalidatePath) dan saat aplikasi dibuka kembali (lihat DataProvider).
 export async function getShellData(): Promise<ShellData> {
   const supabase = await createClient();
-  const [{ branches, products, getStok }, { data }] = await Promise.all([
+  const [{ branches, products, getStok }, { data }, utang, bayar] = await Promise.all([
     getBase(),
     supabase.from("stock_movements").select("*, products(nama), branches(nama)").order("created_at", { ascending: false }).limit(8),
+    // Jika migrasi utang belum dijalankan di database, dua query ini gagal; aplikasi tetap jalan tanpa fitur utang
+    supabase.from("utang_pembelian").select("*").order("created_at").order("id"),
+    supabase.from("supplier_payments").select("*").order("created_at", { ascending: false }).limit(200),
   ]);
   const stok: Record<string, number[]> = {};
   for (const p of products) stok[p.id] = branches.map((b) => getStok(p.id, b.id));
-  return { branches, products, stok, terbaru: (data ?? []) as unknown as RecentMovement[] };
+  return {
+    branches, products, stok,
+    terbaru: (data ?? []) as unknown as RecentMovement[],
+    utang: (utang.data ?? []) as UtangRow[],
+    pembayaran: (bayar.data ?? []) as PembayaranSupplier[],
+  };
 }

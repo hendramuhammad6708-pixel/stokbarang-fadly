@@ -66,6 +66,15 @@ Web app untuk pemilik toko (owner) mengelola stok barang di beberapa cabang dari
 - Mutasi tidak dapat diedit atau dihapus (hanya dikoreksi dengan mutasi penyesuaian) agar riwayat dapat dipercaya.
 - Perubahan stok dan pencatatan mutasi dilakukan dalam satu transaksi database (atomik).
 
+### F4b. Pembayaran dan utang supplier
+- Pembelian (stok masuk atau stok awal barang baru) dengan total harga beli punya status bayar: **Lunas** (bawaan), **Bayar sebagian**, atau **Utang semua**. Sisa utang = total harga − dibayar.
+- Utang dicatat atas nama supplier = isian "Dibeli dari" barang (otomatis terisi, bisa diganti per pembelian). Utang wajib punya nama supplier.
+- Menu **Utang supplier** (Kelola): total utang, utang per supplier, dan riwayat pembayaran. Pembayaran dilakukan **per supplier sekaligus**; nominal otomatis melunasi pembelian **terlama lebih dulu** (dengan pratinjau), tidak boleh melebihi total utang. Tidak ada jatuh tempo.
+- Beranda menampilkan total utang; Riwayat menampilkan sisa utang tiap pembelian.
+- Modal rata-rata tidak terpengaruh status bayar.
+- Pembelian yang masih berutang **tidak dapat dihapus** dari Riwayat (termasuk "Hapus semua"); lunasi dulu.
+- Pembelian lama (sebelum fitur ini) dianggap lunas saat migrasi.
+
 ### F5. Dashboard
 - Kartu ringkasan: jumlah cabang aktif, jumlah jenis barang, total nilai stok (stok × harga beli).
 - Daftar **stok menipis** (stok ≤ stok minimum) beserta cabangnya.

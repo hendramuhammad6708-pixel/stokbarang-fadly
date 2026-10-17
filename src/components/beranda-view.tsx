@@ -6,11 +6,13 @@ import { ChevronRight } from "lucide-react";
 import { useShell } from "@/components/data-provider";
 import { Empty, PageHeader, Section } from "@/components/page-header";
 import { angka, jam, labelHari, rupiah } from "@/lib/format";
+import { kelompokkanUtang, totalUtang } from "@/lib/utang";
 
 type Menipis = { produk: string; satuan: string; cabang: string; cabangId: string; stok: number; min: number };
 
 export function BerandaView() {
-  const { branches, products, stok, terbaru } = useShell();
+  const { branches, products, stok, terbaru, utang } = useShell();
+  const jmlSupplier = kelompokkanUtang(utang, []).length;
 
   // Satu putaran untuk semua angka ringkasan
   const { nilai, totalUnit, perCabang, menipis } = useMemo(() => {
@@ -80,6 +82,17 @@ export function BerandaView() {
           ))}
         </dl>
       </div>
+
+      {utang.length > 0 && (
+        <Link href="/utang" className="panel mb-8 flex items-center justify-between gap-3 px-4 py-3.5 active:bg-line/40">
+          <span>
+            <span className="block text-sm text-muted">Utang ke supplier</span>
+            <span className="num block text-xl font-bold text-warn">{rupiah(totalUtang(utang))}</span>
+            <span className="block text-sm text-muted">{jmlSupplier} supplier · {utang.length} pembelian</span>
+          </span>
+          <ChevronRight size={20} className="shrink-0 text-muted" />
+        </Link>
+      )}
 
       <Section title={`Perlu restock${menipis.length ? ` · ${menipis.length}` : ""}`}>
         {menipis.length === 0 ? (

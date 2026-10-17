@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { useActionState, useEffect, useId, useRef, useState, useTransition, type ReactNode } from "react";
 import { X } from "lucide-react";
 import type { ActionState } from "@/lib/types";
 
@@ -35,6 +35,7 @@ export function FormSheet({ title, description, action, submitLabel = "Simpan", 
   const ref = useRef<HTMLDialogElement>(null);
   const titleId = useId();
   const [state, formAction, pending] = useActionState(action, undefined);
+  const [, mulai] = useTransition();
 
   useEffect(() => {
     ref.current?.showModal();
@@ -52,7 +53,15 @@ export function FormSheet({ title, description, action, submitLabel = "Simpan", 
       onClick={(e) => e.target === ref.current && ref.current?.close()}
       className="m-0 mt-auto w-full max-w-none rounded-t-2xl bg-surface p-0 text-ink sm:m-auto sm:max-w-md sm:rounded-2xl"
     >
-      <form action={formAction} className="flex max-h-[90dvh] flex-col">
+      {/* onSubmit (bukan action=): React tidak mengosongkan isian form saat server menolak, jadi pengguna tidak perlu mengetik ulang */}
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          const data = new FormData(e.currentTarget);
+          mulai(() => formAction(data));
+        }}
+        className="flex max-h-[90dvh] flex-col"
+      >
         <div className="mx-auto mt-2 h-1 w-10 rounded-full bg-line sm:hidden" />
         <div className="flex items-start justify-between gap-3 pl-5 pt-3">
           <div className="min-w-0 pt-1.5">

@@ -2,7 +2,7 @@
 
 import Link, { useLinkStatus } from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutGrid, Layers, Shirt, Store, History, Settings2 } from "lucide-react";
+import { LayoutGrid, Layers, Shirt, Store, History, Settings2, Wallet } from "lucide-react";
 import { Logo } from "@/components/logo";
 
 // Umpan balik halus saat halaman tujuan sedang dimuat (tanpa kerangka loading, yang justru menunda tampilan ~300 ms)
@@ -18,7 +18,7 @@ const menuHP: Item[] = [
   { href: "/", label: "Beranda", icon: LayoutGrid },
   { href: "/stok", label: "Stok", icon: Layers },
   { href: "/riwayat", label: "Riwayat", icon: History },
-  { href: "/kelola", label: "Kelola", icon: Settings2, cocok: ["/kelola", "/barang", "/cabang"] },
+  { href: "/kelola", label: "Kelola", icon: Settings2, cocok: ["/kelola", "/barang", "/cabang", "/utang"] },
 ];
 
 // Desktop: ruang cukup, tampilkan semuanya
@@ -27,6 +27,7 @@ const menuDesktop: Item[] = [
   { href: "/stok", label: "Stok", icon: Layers },
   { href: "/barang", label: "Barang", icon: Shirt },
   { href: "/cabang", label: "Cabang", icon: Store },
+  { href: "/utang", label: "Utang", icon: Wallet },
   { href: "/riwayat", label: "Riwayat", icon: History },
 ];
 

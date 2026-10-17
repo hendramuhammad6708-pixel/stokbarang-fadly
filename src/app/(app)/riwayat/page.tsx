@@ -95,6 +95,8 @@ export default async function RiwayatPage({ searchParams }: { searchParams: Prom
             <ul className="panel divide-y divide-line">
               {g.rows.map((m) => {
                 const delta = m.stok_sesudah - m.stok_sebelum;
+                // Pembelian yang masih berutang tidak boleh dihapus (lunasi dulu di menu Utang)
+                const berutang = m.total_harga != null && (m.dibayar ?? m.total_harga) < m.total_harga;
                 return (
                   <li key={m.id} className="flex items-start">
                     <div className="flex min-w-0 flex-1 items-start justify-between gap-3 py-3 pl-4">
@@ -102,7 +104,11 @@ export default async function RiwayatPage({ searchParams }: { searchParams: Prom
                       <p className="truncate font-medium">{m.products?.nama ?? "Barang dihapus"}</p>
                       <p className="truncate text-sm text-muted">{m.branches?.nama} · {jam(m.created_at)} · {TIPE_LABEL[m.tipe]}</p>
                       {m.total_harga != null && m.tipe === "masuk" && (
-                        <p className="num mt-0.5 text-sm">Dibeli {rupiah(m.total_harga)} <span className="text-muted">({rupiah(Math.round(m.total_harga / m.jumlah))}/{m.products?.satuan ?? "pcs"})</span></p>
+                        <p className="num mt-0.5 text-sm">Dibeli {rupiah(m.total_harga)} <span className="text-muted">({rupiah(Math.round(m.total_harga / m.jumlah))}/{m.products?.satuan ?? "pcs"})</span>
+                          {(m.dibayar ?? m.total_harga) < m.total_harga
+                            ? <span className="font-medium text-warn"> · Sisa utang {rupiah(m.total_harga - (m.dibayar ?? 0))}{m.supplier ? ` ke ${m.supplier}` : ""}</span>
+                            : <span className="text-muted"> · Lunas</span>}
+                        </p>
                       )}
                       {m.catatan && <p className="mt-0.5 text-sm">{m.catatan}</p>}
                     </div>
@@ -111,7 +117,7 @@ export default async function RiwayatPage({ searchParams }: { searchParams: Prom
                       <p className="num text-xs text-muted">{m.stok_sebelum} → {m.stok_sesudah}</p>
                     </div>
                     </div>
-                    <FormDialog
+                    {berutang ? <span className="w-12 shrink-0" aria-hidden /> : <FormDialog
                       trigger={<Trash2 size={17} />}
                       triggerClassName="icon-btn !size-12 shrink-0"
                       triggerLabel={`Hapus riwayat ${m.products?.nama ?? ""}`}
@@ -122,7 +128,7 @@ export default async function RiwayatPage({ searchParams }: { searchParams: Prom
                       danger
                     >
                       <input type="hidden" name="id" value={m.id} />
-                    </FormDialog>
+                    </FormDialog>}
                   </li>
                 );
               })}

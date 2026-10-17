@@ -1,12 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { ChevronRight, LogOut, Plus, Shirt, Store, Trash2 } from "lucide-react";
+import { ChevronRight, LogOut, Plus, Shirt, Store, Trash2, Wallet } from "lucide-react";
 import { BarangList } from "@/components/barang-list";
 import { useBranchOptions, useShell, useSumberList } from "@/components/data-provider";
 import { Field, FormDialog } from "@/components/form-dialog";
 import { Empty, PageHeader } from "@/components/page-header";
 import { StokView } from "@/components/stok-view";
+import { rupiah } from "@/lib/format";
+import { kelompokkanUtang, totalUtang } from "@/lib/utang";
 import type { Branch } from "@/lib/types";
 import { hapusCabang, logout, simpanCabang } from "@/app/actions";
 
@@ -36,8 +38,10 @@ export function BarangRoute() {
 }
 
 export function KelolaRoute() {
-  const { branches, products } = useShell();
+  const { branches, products, utang } = useShell();
+  const jmlSupplier = kelompokkanUtang(utang, []).length;
   const menu = [
+    { href: "/utang", label: "Utang supplier", info: utang.length ? `${rupiah(totalUtang(utang))} · ${jmlSupplier} supplier` : "Tidak ada utang", icon: Wallet },
     { href: "/barang", label: "Barang", info: `${products.length} jenis · tambah, ubah, hapus`, icon: Shirt },
     { href: "/cabang", label: "Cabang", info: `${branches.length} cabang aktif · tambah, ubah, hapus`, icon: Store },
   ];

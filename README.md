@@ -17,6 +17,10 @@ npm install
 npm run dev
 ```
 
+### Memperbarui database yang sudah berjalan
+
+Jika Anda sudah pernah menjalankan `supabase/schema.sql` versi lama, jalankan `supabase/migrations/001_utang_supplier.sql` **sekali** di SQL Editor (menambah fitur utang supplier; pembelian lama dianggap lunas). Aman dijalankan ulang. Project baru cukup menjalankan `schema.sql`.
+
 ### Mode demo (tanpa Supabase)
 
 Isi `DEMO_MODE=true` di `.env.local` untuk mencoba aplikasi dengan data contoh yang disimpan di memori (login dilewati, data hilang saat server restart). Mode ini otomatis mati di production.

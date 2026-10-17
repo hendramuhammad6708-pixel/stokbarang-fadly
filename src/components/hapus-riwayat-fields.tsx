@@ -35,7 +35,7 @@ export function HapusRiwayatFields() {
         <Field label="Ketik HAPUS untuk melanjutkan" name="konfirmasi" required autoComplete="off" autoCapitalize="characters" placeholder="HAPUS" />
       )}
       <p className="border-l-4 border-warn bg-warn/10 px-3 py-2 text-[15px]">
-        Jumlah stok <b>tidak berubah</b>. Yang dihapus hanya catatan di halaman Riwayat, dan <b>tidak bisa dikembalikan</b>.
+        Jumlah stok <b>tidak berubah</b>. Yang dihapus hanya catatan di halaman Riwayat, dan <b>tidak bisa dikembalikan</b>. Pembelian yang masih berutang tidak ikut terhapus.
       </p>
     </>
   );

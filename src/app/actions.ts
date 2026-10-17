@@ -86,10 +86,17 @@ export async function simpanBarang(_: ActionState, f: FormData): Promise<ActionS
     if (stok.some((s) => !Number.isInteger(s.jumlah) || s.jumlah < 0 || s.jumlah > MAKS)) return { error: "Stok awal harus bilangan bulat 0 atau lebih" };
     const totalHarga = num(f, "total_harga");
     if (!valid(totalHarga)) return { error: "Total harga beli harus berupa angka 0 atau lebih" };
+    const dibayar = num(f, "dibayar");
+    if (!valid(dibayar)) return { error: "Jumlah dibayar harus berupa angka 0 atau lebih" };
+    if (dibayar !== null && totalHarga === null) return { error: "Isi total harga beli dulu untuk mencatat pembayaran" };
+    if (dibayar !== null && totalHarga !== null && dibayar > totalHarga) return { error: "Jumlah dibayar tidak boleh melebihi total harga beli" };
+    const berutang = dibayar !== null && totalHarga !== null && dibayar < totalHarga;
+    if (berutang && !data.sumber) return { error: "Isi kolom “Dibeli dari”: utang dicatat atas nama supplier tersebut" };
     const { error } = await supabase.rpc("tambah_barang", {
       p_nama: data.nama, p_kategori: data.kategori, p_sumber: data.sumber, p_satuan: data.satuan,
       p_harga_jual: data.harga_jual, p_stok_minimum: data.stok_minimum, p_catatan: data.catatan,
       p_stok: stok, p_total_harga: totalHarga,
+      ...(berutang ? { p_dibayar: dibayar } : {}),
     });
     if (error) return { error: error.message };
   }
@@ -115,6 +122,11 @@ export async function catatMutasi(_: ActionState, f: FormData): Promise<ActionSt
   const catatan = opt(f, "catatan");
   const totalHarga = tipe === "masuk" ? num(f, "total_harga") : null;
   if (!valid(totalHarga)) return { error: "Total harga beli harus berupa angka 0 atau lebih" };
+  const dibayar = tipe === "masuk" ? num(f, "dibayar") : null;
+  if (!valid(dibayar)) return { error: "Jumlah dibayar harus berupa angka 0 atau lebih" };
+  if (dibayar !== null && totalHarga === null) return { error: "Isi total harga beli dulu untuk mencatat pembayaran" };
+  if (dibayar !== null && totalHarga !== null && dibayar > totalHarga) return { error: "Jumlah dibayar tidak boleh melebihi total harga beli" };
+  const supplier = opt(f, "supplier");
   if (jumlah === null || !Number.isInteger(jumlah) || jumlah < 0 || jumlah > MAKS) return { error: "Jumlah harus bilangan bulat yang wajar" };
   if (!["masuk", "keluar", "penyesuaian"].includes(tipe)) return { error: "Jenis mutasi tidak valid" };
   if (tipe !== "masuk" && jumlah === 0) return { error: "Jumlah harus lebih dari 0" };
@@ -127,6 +139,8 @@ export async function catatMutasi(_: ActionState, f: FormData): Promise<ActionSt
     p_jumlah: jumlah,
     p_catatan: catatan,
     p_total_harga: totalHarga,
+    // Kosong = lunas. Hanya dikirim bila ada utang/pembayaran sebagian.
+    ...(dibayar !== null && totalHarga !== null && dibayar < totalHarga ? { p_dibayar: dibayar, p_supplier: supplier } : {}),
   });
   if (error) return { error: error.message };
   revalidatePath("/", "layout");
@@ -158,7 +172,7 @@ export async function hapusRiwayat(_: ActionState, f: FormData): Promise<ActionS
   const supabase = await createClient();
   const { data, error } = await supabase.from("stock_movements").delete().eq("id", id).select("id");
   if (error) return { error: error.message };
-  if (!data?.length) return { error: "Riwayat tidak ditemukan atau tidak bisa dihapus" };
+  if (!data?.length) return { error: "Riwayat tidak ditemukan, atau pembelian ini masih punya sisa utang (lunasi dulu di menu Utang)" };
   revalidatePath("/", "layout");
   return { ok: true };
 }
@@ -178,7 +192,20 @@ export async function hapusRiwayatBanyak(_: ActionState, f: FormData): Promise<A
     hasil = await q.lt("created_at", batas).select("id");
   }
   if (hasil.error) return { error: hasil.error.message };
-  if (!hasil.data?.length) return { error: "Tidak ada riwayat yang cocok untuk dihapus" };
+  if (!hasil.data?.length) return { error: "Tidak ada riwayat yang bisa dihapus. Pembelian yang masih berutang tidak ikut dihapus." };
+  revalidatePath("/", "layout");
+  return { ok: true };
+}
+
+// Membayar utang ke satu supplier sekaligus; otomatis melunasi pembelian terlama lebih dulu.
+export async function bayarUtang(_: ActionState, f: FormData): Promise<ActionState> {
+  const supplier = str(f, "supplier");
+  const jumlah = num(f, "jumlah");
+  if (!supplier) return { error: "Supplier tidak dipilih" };
+  if (jumlah === null || !Number.isFinite(jumlah) || jumlah <= 0 || jumlah > MAKS) return { error: "Isi jumlah pembayaran lebih dari 0" };
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("bayar_utang", { p_supplier: supplier, p_jumlah: jumlah, p_catatan: opt(f, "catatan") });
+  if (error) return { error: error.message };
   revalidatePath("/", "layout");
   return { ok: true };
 }

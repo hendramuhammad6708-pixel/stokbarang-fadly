@@ -1,6 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import { Field, FormSheet } from "@/components/form-dialog";
+import { PembayaranFields } from "@/components/pembayaran-fields";
 import type { Product } from "@/lib/types";
 import { simpanBarang } from "@/app/actions";
 
@@ -13,6 +15,8 @@ type Props = {
 
 // Form tambah/ubah barang. Saat menambah, stok awal tiap cabang bisa langsung diisi.
 export function ProductSheet({ product: p, branches, sumberList, onClose }: Props) {
+  const [total, setTotal] = useState("");
+  const totalAngka = total !== "" && Number(total) > 0 ? Number(total) : null;
   return (
     <FormSheet title={p ? "Ubah barang" : "Barang baru"} action={simpanBarang} onClose={onClose}>
       {p && <input type="hidden" name="id" value={p.id} />}
@@ -37,7 +41,12 @@ export function ProductSheet({ product: p, branches, sumberList, onClose }: Prop
               <Field key={b.id} label={b.nama} name={`awal_${b.id}`} type="number" min={0} step={1} inputMode="numeric" placeholder="0" />
             ))}
           </div>
-          <Field label="Total harga beli stok awal (Rp)" name="total_harga" type="number" min={0} step="any" inputMode="decimal" placeholder="mis. 350000" hint="Total yang Anda bayar untuk semua stok awal di atas. Dipakai menghitung modal per satuan." />
+          <Field
+            label="Total harga beli stok awal (Rp)" name="total_harga" type="number" min={0} step="any" inputMode="decimal" placeholder="mis. 350000"
+            value={total} onChange={(e) => setTotal(e.target.value)}
+            hint="Total harga seluruh stok awal di atas (bukan yang dibayar sekarang). Dipakai menghitung modal per satuan."
+          />
+          <PembayaranFields total={totalAngka} catatanUtang="Utang dicatat atas nama supplier di kolom “Dibeli dari” di atas." />
         </fieldset>
       )}
 

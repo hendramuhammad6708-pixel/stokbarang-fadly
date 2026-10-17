@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { PembayaranFields } from "@/components/pembayaran-fields";
 import { rupiah } from "@/lib/format";
 
 const tipeList = [
@@ -15,7 +16,7 @@ const ALASAN: Record<string, string[]> = {
   penyesuaian: ["Stok opname", "Salah catat", "Lainnya"],
 };
 
-export function MutasiFields({ productId, branchId, stok, satuan }: { productId: string; branchId: string; stok: number; satuan: string }) {
+export function MutasiFields({ productId, branchId, stok, satuan, sumber }: { productId: string; branchId: string; stok: number; satuan: string; sumber?: string | null }) {
   const [tipe, setTipe] = useState<string>("masuk");
   const [jumlah, setJumlah] = useState("");
   const [total, setTotal] = useState("");
@@ -32,6 +33,7 @@ export function MutasiFields({ productId, branchId, stok, satuan }: { productId:
   const hasil = n === null || !Number.isFinite(n) ? null : tipe === "masuk" ? stok + n : tipe === "keluar" ? stok - n : n;
   const kurang = hasil !== null && hasil < 0;
   const totalN = total === "" ? null : Number(total);
+  const totalAngka = totalN !== null && Number.isFinite(totalN) && totalN > 0 ? totalN : null;
   const perSatuan = tipe === "masuk" && n && n > 0 && totalN !== null && Number.isFinite(totalN) ? totalN / n : null;
 
   const catatan = !daftarAlasan ? ket : lainnya ? ket : ket ? `${alasanAktif} - ${ket}` : alasanAktif;
@@ -82,8 +84,14 @@ export function MutasiFields({ productId, branchId, stok, satuan }: { productId:
             value={total} onChange={(e) => setTotal(e.target.value)} className="input num" placeholder="mis. 350000"
           />
           <p className="mt-1.5 text-[15px] text-muted num">
-            {perSatuan !== null ? <>Setara <b className="text-ink">{rupiah(Math.round(perSatuan))}</b> per {satuan}</> : "Isi total yang Anda bayar untuk semua jumlah di atas. Boleh dikosongkan."}
+            {perSatuan !== null ? <>Setara <b className="text-ink">{rupiah(Math.round(perSatuan))}</b> per {satuan}</> : "Total harga seluruh jumlah di atas (bukan yang dibayar sekarang). Boleh dikosongkan."}
           </p>
+        </div>
+      )}
+
+      {tipe === "masuk" && (
+        <div>
+          <PembayaranFields total={totalAngka} supplierDefault={sumber ?? null} />
         </div>
       )}
 

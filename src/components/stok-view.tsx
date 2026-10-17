@@ -186,7 +186,7 @@ export function StokView({ branches, products, stok, sumberList, initialBranch, 
           submitLabel="Catat"
           onClose={() => setSheet(null)}
         >
-          <MutasiFields productId={sheet.p.id} branchId={cabang.id} stok={matriks[sheet.p.id]?.[aktifIdx] ?? 0} satuan={sheet.p.satuan} />
+          <MutasiFields productId={sheet.p.id} branchId={cabang.id} stok={matriks[sheet.p.id]?.[aktifIdx] ?? 0} satuan={sheet.p.satuan} sumber={sheet.p.sumber} />
         </FormSheet>
       )}
       {sheet?.type === "baru" && <ProductSheet branches={branches} sumberList={sumberList} onClose={() => setSheet(null)} />}
