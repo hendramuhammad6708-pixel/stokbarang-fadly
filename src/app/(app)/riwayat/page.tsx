@@ -106,7 +106,7 @@ export default async function RiwayatPage({ searchParams }: { searchParams: Prom
                       {m.total_harga != null && m.tipe === "masuk" && (
                         <p className="num mt-0.5 text-sm">Dibeli {rupiah(m.total_harga)} <span className="text-muted">({rupiah(Math.round(m.total_harga / m.jumlah))}/{m.products?.satuan ?? "pcs"})</span>
                           {(m.dibayar ?? m.total_harga) < m.total_harga
-                            ? <span className="font-medium text-warn"> · Sisa utang {rupiah(m.total_harga - (m.dibayar ?? 0))}{m.supplier ? ` ke ${m.supplier}` : ""}</span>
+                            ? <span className="font-medium text-danger"> · Sisa utang {rupiah(m.total_harga - (m.dibayar ?? 0))}{m.supplier ? ` ke ${m.supplier}` : ""}</span>
                             : <span className="text-muted"> · Lunas</span>}
                         </p>
                       )}

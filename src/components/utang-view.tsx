@@ -67,7 +67,7 @@ function BayarFields({ grup }: { grup: GrupUtang }) {
                 </div>
                 <div className="shrink-0 text-right">
                   <p className="num font-semibold">{rupiah(r.sisa)}</p>
-                  {ambil > 0 && <p className={`num text-sm font-medium ${lunas ? "text-ok" : "text-warn"}`}>{lunas ? "jadi lunas" : `sisa ${rupiah(Number(r.sisa) - ambil)}`}</p>}
+                  {ambil > 0 && <p className={`num text-sm font-medium ${lunas ? "text-ok" : "text-danger"}`}>{lunas ? "jadi lunas" : `sisa ${rupiah(Number(r.sisa) - ambil)}`}</p>}
                 </div>
               </li>
             );
@@ -114,7 +114,7 @@ export function UtangView() {
         <>
           <div className="panel mb-6 p-4">
             <p className="text-sm text-muted">Total utang</p>
-            <p className="num text-3xl font-bold text-warn">{rupiah(total)}</p>
+            <p className="num text-3xl font-bold text-danger">{rupiah(total)}</p>
             <p className="mt-0.5 text-sm text-muted">{grup.length} supplier · {utang.length} pembelian</p>
           </div>
 

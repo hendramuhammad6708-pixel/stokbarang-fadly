@@ -13,12 +13,13 @@ function Pending() {
 
 type Item = { href: string; label: string; icon: typeof LayoutGrid; cocok?: string[] };
 
-// HP: 4 menu saja. Barang dan Cabang jarang dibuka, jadi dikelompokkan di "Kelola".
+// HP: 5 menu. Barang dan Cabang jarang dibuka, jadi dikelompokkan di "Kelola"; Utang sering dibuka, jadi punya tab sendiri.
 const menuHP: Item[] = [
   { href: "/", label: "Beranda", icon: LayoutGrid },
   { href: "/stok", label: "Stok", icon: Layers },
+  { href: "/utang", label: "Utang", icon: Wallet },
   { href: "/riwayat", label: "Riwayat", icon: History },
-  { href: "/kelola", label: "Kelola", icon: Settings2, cocok: ["/kelola", "/barang", "/cabang", "/utang"] },
+  { href: "/kelola", label: "Kelola", icon: Settings2, cocok: ["/kelola", "/barang", "/cabang"] },
 ];
 
 // Desktop: ruang cukup, tampilkan semuanya
@@ -57,7 +58,7 @@ export function Nav() {
       </aside>
 
       <nav aria-label="Menu utama" className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface pb-[env(safe-area-inset-bottom)] md:hidden">
-        <ul className="grid grid-cols-4">
+        <ul className="grid grid-cols-5">
           {menuHP.map((it) => (
             <li key={it.href}>
               <Link

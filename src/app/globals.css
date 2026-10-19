@@ -73,3 +73,14 @@ dialog::backdrop { background: rgb(10 12 10 / 0.55); }
 dialog[open] { animation: naik 0.18s ease-out; }
 @keyframes naik { from { transform: translateY(24px); opacity: 0.6; } }
 @media (prefers-reduced-motion: reduce) { dialog[open] { animation: none; } }
+
+/* Transisi antar halaman: pudar singkat + naik sedikit; menu dan header tidak ikut bergerak */
+::view-transition { pointer-events: none; }
+::view-transition-old(.halaman-keluar) { animation: 90ms ease-in both memudar reverse; }
+::view-transition-new(.halaman-masuk) { animation: 180ms ease-out 60ms both memudar, 220ms ease-out 60ms both naik-sedikit; }
+@keyframes memudar { from { opacity: 0; } to { opacity: 1; } }
+@keyframes naik-sedikit { from { transform: translateY(8px); } to { transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(*), ::view-transition-new(*), ::view-transition-group(*) { animation-duration: 0s !important; animation-delay: 0s !important; }
+}
+::view-transition-old(root), ::view-transition-new(root) { animation: none; }

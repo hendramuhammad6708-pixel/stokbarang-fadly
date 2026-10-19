@@ -62,7 +62,7 @@ export function PembayaranFields({ total, supplierDefault, catatanUtang }: {
         </div>
       )}
 
-      <p className={`text-[15px] num ${lebih ? "font-medium text-danger" : sisa > 0 ? "font-semibold text-warn" : "text-muted"}`}>
+      <p className={`text-[15px] num ${lebih ? "font-medium text-danger" : sisa > 0 ? "font-semibold text-danger" : "text-muted"}`}>
         {lebih ? `Melebihi total harga beli (${rupiah(total)})` : sisa > 0 ? `Sisa utang ${rupiah(sisa)}` : "Lunas, tidak ada utang."}
       </p>
 

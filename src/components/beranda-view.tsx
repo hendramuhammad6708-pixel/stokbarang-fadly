@@ -86,8 +86,8 @@ export function BerandaView() {
       {utang.length > 0 && (
         <Link href="/utang" className="panel mb-8 flex items-center justify-between gap-3 px-4 py-3.5 active:bg-line/40">
           <span>
-            <span className="block text-sm text-muted">Utang ke supplier</span>
-            <span className="num block text-xl font-bold text-warn">{rupiah(totalUtang(utang))}</span>
+            <span className="block text-sm font-medium text-danger">Utang ke supplier</span>
+            <span className="num block text-xl font-bold text-danger">{rupiah(totalUtang(utang))}</span>
             <span className="block text-sm text-muted">{jmlSupplier} supplier · {utang.length} pembelian</span>
           </span>
           <ChevronRight size={20} className="shrink-0 text-muted" />

@@ -54,8 +54,8 @@ export function KelolaRoute() {
             <Link href={href} className="flex min-h-16 items-center gap-3 px-4 py-3 active:bg-line/40">
               <Icon size={22} className="shrink-0 text-muted" />
               <span className="min-w-0 flex-1">
-                <span className="block font-medium">{label}</span>
-                <span className="block truncate text-sm text-muted">{info}</span>
+                <span className={`block font-medium ${href === "/utang" && utang.length ? "text-danger" : ""}`}>{label}</span>
+                <span className={`block truncate text-sm ${href === "/utang" && utang.length ? "text-danger" : "text-muted"}`}>{info}</span>
               </span>
               <ChevronRight size={18} className="shrink-0 text-muted" />
             </Link>
