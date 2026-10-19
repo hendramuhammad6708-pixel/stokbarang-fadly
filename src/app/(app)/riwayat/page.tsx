@@ -4,10 +4,11 @@ import { createClient } from "@/lib/supabase/server";
 import { AutoSubmitSelect } from "@/components/auto-submit-select";
 import { FormDialog } from "@/components/form-dialog";
 import { HapusRiwayatFields } from "@/components/hapus-riwayat-fields";
+import { RiwayatBaris } from "@/components/riwayat-baris";
 import { Empty, PageHeader } from "@/components/page-header";
 import { jam, kunciHari, labelHari, rupiah } from "@/lib/format";
 import type { Branch, Movement } from "@/lib/types";
-import { hapusRiwayat, hapusRiwayatBanyak } from "../../actions";
+import { hapusRiwayatBanyak } from "../../actions";
 
 type Row = Movement & { products: { nama: string; satuan: string } | null; branches: { nama: string } | null };
 const PER_HALAMAN = 25;
@@ -98,8 +99,13 @@ export default async function RiwayatPage({ searchParams }: { searchParams: Prom
                 // Pembelian yang masih berutang tidak boleh dihapus (lunasi dulu di menu Utang)
                 const berutang = m.total_harga != null && (m.dibayar ?? m.total_harga) < m.total_harga;
                 return (
-                  <li key={m.id} className="flex items-start">
-                    <div className="flex min-w-0 flex-1 items-start justify-between gap-3 py-3 pl-4">
+                  <RiwayatBaris
+                    key={m.id}
+                    id={m.id}
+                    nama={m.products?.nama ?? ""}
+                    ringkas={`${m.products?.nama ?? "Barang"} · ${m.branches?.nama ?? ""} · ${delta > 0 ? "+" : ""}${delta}`}
+                    berutang={berutang}
+                  >
                     <div className="min-w-0">
                       <p className="truncate font-medium">{m.products?.nama ?? "Barang dihapus"}</p>
                       <p className="truncate text-sm text-muted">{m.branches?.nama} · {jam(m.created_at)} · {TIPE_LABEL[m.tipe]}</p>
@@ -116,20 +122,7 @@ export default async function RiwayatPage({ searchParams }: { searchParams: Prom
                       <p className={`num text-lg font-bold leading-tight ${delta >= 0 ? "text-ok" : "text-danger"}`}>{delta > 0 ? "+" : ""}{delta}</p>
                       <p className="num text-xs text-muted">{m.stok_sebelum} → {m.stok_sesudah}</p>
                     </div>
-                    </div>
-                    {berutang ? <span className="w-12 shrink-0" aria-hidden /> : <FormDialog
-                      trigger={<Trash2 size={17} />}
-                      triggerClassName="icon-btn !size-12 shrink-0"
-                      triggerLabel={`Hapus riwayat ${m.products?.nama ?? ""}`}
-                      title="Hapus riwayat ini?"
-                      description={`${m.products?.nama ?? "Barang"} · ${m.branches?.nama ?? ""} · ${delta > 0 ? "+" : ""}${delta}. Jumlah stok tidak berubah; hanya catatan ini yang dihapus.`}
-                      action={hapusRiwayat}
-                      submitLabel="Hapus"
-                      danger
-                    >
-                      <input type="hidden" name="id" value={m.id} />
-                    </FormDialog>}
-                  </li>
+                  </RiwayatBaris>
                 );
               })}
             </ul>

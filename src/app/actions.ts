@@ -59,21 +59,21 @@ export async function hapusCabang(_: ActionState, f: FormData): Promise<ActionSt
 export async function simpanBarang(_: ActionState, f: FormData): Promise<ActionState> {
   const nama = str(f, "nama");
   if (!nama) return { error: "Nama barang wajib diisi" };
-  const hargaJual = num(f, "harga_jual");
   const stokMin = num(f, "stok_minimum");
-  if (!valid(hargaJual)) return { error: "Harga jual harus berupa angka 0 atau lebih" };
   if (!valid(stokMin)) return { error: "Stok minimum harus berupa angka 0 atau lebih" };
   const supabase = await createClient();
   const data = {
     nama,
-    kategori: opt(f, "kategori"),
     sumber: opt(f, "sumber"),
-    satuan: str(f, "satuan") || "pcs",
-    harga_jual: hargaJual,
     stok_minimum: Math.floor(stokMin ?? 0),
     catatan: opt(f, "catatan"),
   };
   const id = str(f, "id");
+
+  // Nama barang harus unik (tanpa membedakan huruf besar/kecil dan spasi di tepi); barang yang sudah diarsipkan tidak dihitung
+  const { data: ada } = await supabase.from("products").select("id, nama").eq("is_archived", false);
+  const kembar = (ada ?? []).some((x: { id: string; nama: string }) => x.id !== id && x.nama.trim().toLowerCase() === nama.toLowerCase());
+  if (kembar) return { error: `Barang “${nama}” sudah ada. Gunakan nama lain, misalnya tambahkan ukuran atau warna.` };
 
   if (id) {
     const { error } = await supabase.from("products").update(data).eq("id", id);
@@ -92,9 +92,10 @@ export async function simpanBarang(_: ActionState, f: FormData): Promise<ActionS
     if (dibayar !== null && totalHarga !== null && dibayar > totalHarga) return { error: "Jumlah dibayar tidak boleh melebihi total harga beli" };
     const berutang = dibayar !== null && totalHarga !== null && dibayar < totalHarga;
     if (berutang && !data.sumber) return { error: "Isi kolom “Dibeli dari”: utang dicatat atas nama supplier tersebut" };
+    // Kategori, satuan, dan harga jual tidak lagi diisi di form: barang baru memakai bawaan (kosong, pcs, kosong)
     const { error } = await supabase.rpc("tambah_barang", {
-      p_nama: data.nama, p_kategori: data.kategori, p_sumber: data.sumber, p_satuan: data.satuan,
-      p_harga_jual: data.harga_jual, p_stok_minimum: data.stok_minimum, p_catatan: data.catatan,
+      p_nama: data.nama, p_kategori: null, p_sumber: data.sumber, p_satuan: "pcs",
+      p_harga_jual: null, p_stok_minimum: data.stok_minimum, p_catatan: data.catatan,
       p_stok: stok, p_total_harga: totalHarga,
       ...(berutang ? { p_dibayar: dibayar } : {}),
     });

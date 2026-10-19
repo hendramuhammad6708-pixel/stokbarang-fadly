@@ -21,13 +21,8 @@ export function ProductSheet({ product: p, branches, sumberList, onClose }: Prop
     <FormSheet title={p ? "Ubah barang" : "Barang baru"} action={simpanBarang} onClose={onClose}>
       {p && <input type="hidden" name="id" value={p.id} />}
       <Field label="Nama barang" name="nama" required defaultValue={p?.nama} placeholder="mis. Kaos Polos Hitam - M" autoFocus={!p} />
-      <div className="grid grid-cols-2 gap-3">
-        <Field label="Kategori" name="kategori" defaultValue={p?.kategori ?? ""} placeholder="mis. Kaos" />
-        <Field label="Satuan" name="satuan" defaultValue={p?.satuan ?? "pcs"} placeholder="pcs, set, lusin" />
-      </div>
       <Field label="Dibeli dari" name="sumber" list="daftar-sumber" defaultValue={p?.sumber ?? ""} placeholder="mis. Grosir Tanah Abang" autoComplete="off" />
       <datalist id="daftar-sumber">{sumberList.map((s) => <option key={s} value={s} />)}</datalist>
-      <Field label="Harga jual per satuan (Rp)" name="harga_jual" type="number" min={0} step="any" inputMode="decimal" defaultValue={p?.harga_jual ?? ""} />
       <Field
         label="Stok minimum" name="stok_minimum" type="number" min={0} step={1} inputMode="numeric" defaultValue={p?.stok_minimum ?? 0}
         hint="Muncul di “Perlu restock” saat stok sama dengan atau di bawah angka ini. Isi 0 untuk mematikan."

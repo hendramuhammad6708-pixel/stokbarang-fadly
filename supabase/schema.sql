@@ -33,6 +33,10 @@ create table public.products (
   created_at timestamptz not null default now()
 );
 
+-- Nama barang unik per pemilik (abaikan huruf besar/kecil dan spasi di tepi; barang arsip tidak dihitung)
+create unique index if not exists products_nama_unik
+  on public.products (owner_id, lower(btrim(nama))) where not is_archived;
+
 create table public.stock_levels (
   product_id uuid not null references public.products(id) on delete cascade,
   branch_id uuid not null references public.branches(id) on delete cascade,
