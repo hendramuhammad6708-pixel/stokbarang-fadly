@@ -256,10 +256,17 @@ function bayarUtang(a: { p_supplier: string; p_jumlah: number; p_catatan?: strin
   return { error: null };
 }
 
+function hapusUtang(a: { p_ids: string[] }) {
+  const s = store();
+  const hapus = s.stock_movements.filter((m) => a.p_ids.includes(m.id) && m.total_harga != null && m.dibayar < m.total_harga);
+  s.stock_movements = s.stock_movements.filter((m) => !hapus.includes(m));
+  return { data: hapus.length, error: null };
+}
+
 export function createDemoClient() {
   return {
     from: (table: Tabel) => new Query(table),
-    rpc: async (fn: string, args: any) => (await jeda(), fn === "tambah_barang" ? tambahBarang(args) : fn === "bayar_utang" ? bayarUtang(args) : catatMutasi(args)),
+    rpc: async (fn: string, args: any) => (await jeda(), fn === "tambah_barang" ? tambahBarang(args) : fn === "bayar_utang" ? bayarUtang(args) : fn === "hapus_utang" ? hapusUtang(args) : catatMutasi(args)),
     auth: { signOut: async () => ({ error: null }), signInWithPassword: async () => ({ error: null }) },
   } as any;
 }

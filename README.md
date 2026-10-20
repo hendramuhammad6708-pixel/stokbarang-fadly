@@ -19,7 +19,11 @@ npm run dev
 
 ### Memperbarui database yang sudah berjalan
 
-Jika Anda sudah pernah menjalankan `supabase/schema.sql` versi lama, jalankan `supabase/migrations/001_utang_supplier.sql` **sekali** di SQL Editor (menambah fitur utang supplier; pembelian lama dianggap lunas). Aman dijalankan ulang. Project baru cukup menjalankan `schema.sql`.
+Jika Anda sudah pernah menjalankan `supabase/schema.sql` versi lama, jalankan `supabase/migrations/001_utang_supplier.sql` **sekali** di SQL Editor (menambah fitur utang supplier; pembelian lama dianggap lunas). Lalu jalankan `supabase/migrations/003_hapus_utang.sql` (fitur hapus utang dan catatan pembayaran) dan, bila mau, `002_nama_barang_unik.sql` (nama barang unik di database). Semuanya aman dijalankan ulang. Project baru cukup menjalankan `schema.sql`.
+
+### Mengosongkan data
+
+Untuk memulai dari nol (misalnya setelah uji coba), jalankan `supabase/kosongkan_data.sql` di SQL Editor. Barang, stok, riwayat, dan utang terhapus permanen; akun dan cabang tetap.
 
 ### Mode demo (tanpa Supabase)
 

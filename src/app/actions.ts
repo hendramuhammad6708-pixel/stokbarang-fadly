@@ -183,17 +183,25 @@ export async function hapusRiwayatBanyak(_: ActionState, f: FormData): Promise<A
   const supabase = await createClient();
   const q = supabase.from("stock_movements").delete();
   let hasil;
+  let hari = 0;
   if (rentang === "semua") {
     if (str(f, "konfirmasi").toUpperCase() !== "HAPUS") return { error: "Ketik HAPUS untuk menghapus seluruh riwayat" };
     hasil = await q.gte("created_at", "1970-01-01T00:00:00Z").select("id");
   } else {
-    const hari = Number(rentang);
+    hari = Number(rentang);
     if (![30, 90, 365].includes(hari)) return { error: "Pilihan rentang tidak valid" };
     const batas = new Date(Date.now() - hari * 86_400_000).toISOString();
     hasil = await q.lt("created_at", batas).select("id");
   }
   if (hasil.error) return { error: hasil.error.message };
-  if (!hasil.data?.length) return { error: "Tidak ada riwayat yang bisa dihapus. Pembelian yang masih berutang tidak ikut dihapus." };
+  if (!hasil.data?.length) {
+    if (hari) {
+      const batas = new Date(Date.now() - hari * 86_400_000).toISOString();
+      const { count } = await supabase.from("stock_movements").select("id", { count: "exact", head: true }).lt("created_at", batas);
+      if (!count) return { error: `Belum ada riwayat yang lebih lama dari ${hari} hari, jadi tidak ada yang dihapus. Pilih “Semua riwayat” untuk menghapus riwayat yang lebih baru.` };
+    }
+    return { error: "Tidak ada riwayat yang bisa dihapus: sisanya adalah pembelian yang masih berutang (lunasi dulu di menu Utang)." };
+  }
   revalidatePath("/", "layout");
   return { ok: true };
 }
@@ -207,6 +215,30 @@ export async function bayarUtang(_: ActionState, f: FormData): Promise<ActionSta
   const supabase = await createClient();
   const { error } = await supabase.rpc("bayar_utang", { p_supplier: supplier, p_jumlah: jumlah, p_catatan: opt(f, "catatan") });
   if (error) return { error: error.message };
+  revalidatePath("/", "layout");
+  return { ok: true };
+}
+
+// Menghapus pembelian yang masih berutang (satu atau semua milik satu supplier). Stok tidak berubah.
+export async function hapusUtang(_: ActionState, f: FormData): Promise<ActionState> {
+  const ids = f.getAll("id").map(String).filter(Boolean);
+  if (!ids.length) return { error: "Tidak ada utang yang dipilih" };
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("hapus_utang", { p_ids: ids });
+  if (error) return { error: error.message };
+  if (!data) return { error: "Utang tidak ditemukan atau sudah lunas" };
+  revalidatePath("/", "layout");
+  return { ok: true };
+}
+
+// Menghapus satu catatan pembayaran. Hanya catatannya; sisa utang pembelian tidak berubah.
+export async function hapusPembayaran(_: ActionState, f: FormData): Promise<ActionState> {
+  const id = str(f, "id");
+  if (!id) return { error: "Pembayaran tidak dipilih" };
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("supplier_payments").delete().eq("id", id).select("id");
+  if (error) return { error: error.message };
+  if (!data?.length) return { error: "Catatan pembayaran tidak ditemukan" };
   revalidatePath("/", "layout");
   return { ok: true };
 }

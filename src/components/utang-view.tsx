@@ -1,14 +1,15 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Trash2 } from "lucide-react";
 import { useShell } from "@/components/data-provider";
 import { FormSheet } from "@/components/form-dialog";
 import { Empty, PageHeader, Section } from "@/components/page-header";
+import { useTahan } from "@/components/use-tahan";
 import { jam, labelHari, rupiah } from "@/lib/format";
 import { kelompokkanUtang, totalUtang, type GrupUtang } from "@/lib/utang";
-import type { UtangRow } from "@/lib/types";
-import { bayarUtang } from "@/app/actions";
+import type { PembayaranSupplier, UtangRow } from "@/lib/types";
+import { bayarUtang, hapusPembayaran, hapusUtang } from "@/app/actions";
 
 function Tanggal({ iso }: { iso: string }) {
   return <span suppressHydrationWarning>{labelHari(iso)}, {jam(iso)}</span>;
@@ -95,12 +96,56 @@ function BayarFields({ grup }: { grup: GrupUtang }) {
   );
 }
 
+// Baris supplier: ketuk = bayar, tahan lama atau tempat sampah = hapus utangnya
+function BarisSupplier({ g, onBayar, onHapus }: { g: GrupUtang; onBayar: () => void; onHapus: () => void }) {
+  const tahan = useTahan(onHapus);
+  return (
+    <li className="flex touch-pan-y select-none items-stretch [-webkit-touch-callout:none]" {...tahan}>
+      <button onClick={onBayar} className="flex min-h-16 min-w-0 flex-1 items-center justify-between gap-3 py-3 pl-4 pr-2 text-left active:bg-line/40">
+        <span className="min-w-0">
+          <span className="block truncate font-medium">{g.nama}</span>
+          <span className="block text-sm text-muted">{g.rows.length} pembelian belum lunas</span>
+        </span>
+        <span className="flex shrink-0 items-center gap-2">
+          <span className="num text-lg font-bold">{rupiah(g.sisa)}</span>
+          <ChevronRight size={18} className="text-muted" />
+        </span>
+      </button>
+      <button onClick={onHapus} aria-label={`Hapus utang ${g.nama}`} className="icon-btn !size-auto min-w-12">
+        <Trash2 size={18} />
+      </button>
+    </li>
+  );
+}
+
+// Baris catatan pembayaran: tahan lama atau tempat sampah = hapus catatan
+function BarisPembayaran({ p, onHapus }: { p: PembayaranSupplier; onHapus: () => void }) {
+  const tahan = useTahan(onHapus);
+  return (
+    <li className="flex touch-pan-y select-none items-center [-webkit-touch-callout:none]" {...tahan}>
+      <div className="flex min-h-14 min-w-0 flex-1 items-center justify-between gap-3 py-2.5 pl-4 pr-2">
+        <div className="min-w-0">
+          <p className="truncate font-medium">{p.supplier}</p>
+          <p className="truncate text-sm text-muted"><Tanggal iso={p.created_at} />{p.catatan ? ` · ${p.catatan}` : ""}</p>
+        </div>
+        <p className="num shrink-0 font-bold text-ok">{rupiah(p.jumlah)}</p>
+      </div>
+      <button onClick={onHapus} aria-label={`Hapus pembayaran ${p.supplier}`} className="icon-btn !size-auto min-h-12 min-w-12">
+        <Trash2 size={18} />
+      </button>
+    </li>
+  );
+}
+
+type Hapus = { type: "utang"; g: GrupUtang } | { type: "bayar"; p: PembayaranSupplier } | null;
+
 export function UtangView() {
   const { utang, pembayaran } = useShell();
   const grup = useMemo(() => kelompokkanUtang(utang, pembayaran), [utang, pembayaran]);
   const total = useMemo(() => totalUtang(utang), [utang]);
   const [terpilih, setTerpilih] = useState<string | null>(null);
   const aktif = grup.find((g) => g.kunci === terpilih);
+  const [hapus, setHapus] = useState<Hapus>(null);
 
   return (
     <>
@@ -121,18 +166,7 @@ export function UtangView() {
           <Section title="Per supplier">
             <ul className="panel divide-y divide-line">
               {grup.map((g) => (
-                <li key={g.kunci}>
-                  <button onClick={() => setTerpilih(g.kunci)} className="flex min-h-16 w-full items-center justify-between gap-3 px-4 py-3 text-left active:bg-line/40">
-                    <span className="min-w-0">
-                      <span className="block truncate font-medium">{g.nama}</span>
-                      <span className="block text-sm text-muted">{g.rows.length} pembelian belum lunas</span>
-                    </span>
-                    <span className="flex shrink-0 items-center gap-2">
-                      <span className="num text-lg font-bold">{rupiah(g.sisa)}</span>
-                      <ChevronRight size={18} className="text-muted" />
-                    </span>
-                  </button>
-                </li>
+                <BarisSupplier key={g.kunci} g={g} onBayar={() => setTerpilih(g.kunci)} onHapus={() => setHapus({ type: "utang", g })} />
               ))}
             </ul>
           </Section>
@@ -143,13 +177,7 @@ export function UtangView() {
         <Section title="Pembayaran terakhir">
           <ul className="panel divide-y divide-line">
             {pembayaran.slice(0, 8).map((p) => (
-              <li key={p.id} className="flex min-h-14 items-center justify-between gap-3 px-4 py-2.5">
-                <div className="min-w-0">
-                  <p className="truncate font-medium">{p.supplier}</p>
-                  <p className="truncate text-sm text-muted"><Tanggal iso={p.created_at} />{p.catatan ? ` · ${p.catatan}` : ""}</p>
-                </div>
-                <p className="num shrink-0 font-bold text-ok">{rupiah(p.jumlah)}</p>
-              </li>
+              <BarisPembayaran key={p.id} p={p} onHapus={() => setHapus({ type: "bayar", p })} />
             ))}
           </ul>
         </Section>
@@ -164,6 +192,31 @@ export function UtangView() {
           onClose={() => setTerpilih(null)}
         >
           <BayarFields grup={aktif} />
+        </FormSheet>
+      )}
+
+      {hapus?.type === "utang" && (
+        <FormSheet
+          title={`Hapus utang ${hapus.g.nama}?`}
+          description={`${hapus.g.rows.length} pembelian dengan sisa ${rupiah(hapus.g.sisa)} dihapus beserta catatannya di Riwayat. Jumlah stok tidak berubah dan tidak bisa dikembalikan.`}
+          action={hapusUtang}
+          submitLabel="Hapus utang"
+          danger
+          onClose={() => setHapus(null)}
+        >
+          {hapus.g.rows.map((r) => <input key={r.id} type="hidden" name="id" value={r.id} />)}
+        </FormSheet>
+      )}
+      {hapus?.type === "bayar" && (
+        <FormSheet
+          title="Hapus catatan pembayaran?"
+          description={`${hapus.p.supplier} · ${rupiah(hapus.p.jumlah)}. Hanya catatan ini yang dihapus; sisa utang tidak berubah.`}
+          action={hapusPembayaran}
+          submitLabel="Hapus"
+          danger
+          onClose={() => setHapus(null)}
+        >
+          <input type="hidden" name="id" value={hapus.p.id} />
         </FormSheet>
       )}
     </>

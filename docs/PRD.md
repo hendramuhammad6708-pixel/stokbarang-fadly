@@ -72,7 +72,7 @@ Web app untuk pemilik toko (owner) mengelola stok barang di beberapa cabang dari
 - Menu **Utang supplier** (Kelola): total utang, utang per supplier, dan riwayat pembayaran. Pembayaran dilakukan **per supplier sekaligus**; nominal otomatis melunasi pembelian **terlama lebih dulu** (dengan pratinjau), tidak boleh melebihi total utang. Tidak ada jatuh tempo.
 - Beranda menampilkan total utang; Riwayat menampilkan sisa utang tiap pembelian.
 - Modal rata-rata tidak terpengaruh status bayar.
-- Pembelian yang masih berutang **tidak dapat dihapus** dari Riwayat (termasuk "Hapus semua"); lunasi dulu.
+- Pembelian yang masih berutang **tidak ikut terhapus** oleh "Hapus riwayat" massal. Utang tetap bisa dihapus dengan sengaja: per supplier di menu Utang (tombol tempat sampah atau tahan lama), atau per pembelian dari Riwayat (dengan peringatan). Catatan pembayaran juga bisa dihapus (sisa utang tidak berubah). Stok tidak pernah berubah karena penghapusan.
 - Pembelian lama (sebelum fitur ini) dianggap lunas saat migrasi.
 
 ### F5. Dashboard
